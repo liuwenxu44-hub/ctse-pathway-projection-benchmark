@@ -1,0 +1,31 @@
+# Never publish project materials from this documentation-only repository.
+manuscript/
+submission*/
+figures/
+tables/
+results/
+source_data/
+data/
+checkpoints/
+provenance/
+reports/
+contracts/
+audits/
+
+# Local or machine-specific files.
+.env
+.env.*
+*.Rhistory
+*.RData
+*.Rproj.user/
+renv/library/
+__pycache__/
+*.log
+*.tmp
+*.bak
+*.zip
+*.tar
+*.tar.gz
+*.7z
+.DS_Store
+Thumbs.db
