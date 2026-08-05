@@ -1,5 +1,8 @@
 source("R/ctse_benchmark.R")
 source("R/adapters.R")
+source("R/simulation.R")
+source("R/method_wrappers.R")
+source("R/study_endpoints.R")
 
 genes <- paste0("g", seq_len(6L))
 cell_types <- c("A", "B")
@@ -60,4 +63,74 @@ failure_written <- write_ctse_benchmark_result(failure, output_dir, "task-002")
 stopifnot(all(file.exists(unlist(failure_written))))
 stopifnot(length(list.files(output_dir, pattern = "STRUCTURED_FAILURE$")) == 1L)
 
-cat("All CTSE benchmark tests passed.\n")
+cat("Core CTSE benchmark tests passed.\n")
+
+design <- ctse_simulation_design()
+stopifnot(nrow(design$scenarios) == 6L)
+stopifnot(length(design$genes) == 2000L)
+profiles <- ctse_population_profiles("complete_cancellation", design)
+stopifnot(identical(dim(profiles), c(2000L, 4L, 2L)))
+stopifnot(max(abs(apply(profiles, c(2L, 3L), sum) - 1)) < 1e-14)
+
+bulk <- ctse_generate_bulk(
+  "complete_cancellation", 1L, design, profiles, samples_per_group = 4L
+)
+stopifnot(identical(dim(bulk$counts), c(2000L, 8L)))
+stopifnot(all(colSums(bulk$counts) == bulk$metadata$library_size))
+stopifnot(max(abs(rowSums(bulk$oracle_compositions) - 1)) < 1e-12)
+truth_tensor <- ctse_truth_tensor(profiles, bulk$metadata)
+stopifnot(identical(dim(truth_tensor), c(2000L, 4L, 8L)))
+
+simulation_result <- run_ctse_benchmark(
+  truth_tensor, bulk$metadata, ctse_simulation_pathways(design)$signal,
+  "group0", "group1", truth = truth_tensor
+)
+stopifnot(simulation_result$status == "SUCCESS")
+stopifnot(all(simulation_result$comparison$absolute_error == 0))
+
+fraction_accuracy <- ctse_fraction_accuracy(
+  bulk$oracle_compositions, bulk$oracle_compositions
+)
+stopifnot(all(fraction_accuracy$absolute_error == 0))
+gene_accuracy <- ctse_gene_accuracy(truth_tensor, truth_tensor)
+stopifnot(all(gene_accuracy$rmse == 0))
+interval <- ctse_bootstrap_mean_ci(1:10, seed = 20260729L, resamples = 100L)
+stopifnot(interval[["estimate"]] == 5.5)
+
+sample_map <- data.frame(
+  sample_id = dimnames(truth_tensor)[[3L]],
+  mixture_id = rep(c("Mix1", "Mix2"), each = 4L),
+  replicate_id = rep(1:4, times = 2L),
+  stringsAsFactors = FALSE
+)
+c1_proxy <- profiles[, , "state0"]
+c2_proxy <- array(
+  NA_real_, dim = c(2000L, 4L, 2L),
+  dimnames = list(design$genes, design$cell_types, c("Mix1", "Mix2"))
+)
+c2_proxy[, , 1L] <- profiles[, , "state0"]
+c2_proxy[, , 2L] <- profiles[, , "state1"]
+c1_endpoint <- ctse_external_endpoint_levels(truth_tensor, c1_proxy, sample_map, "C1")
+c2_endpoint <- ctse_external_endpoint_levels(truth_tensor, c2_proxy, sample_map, "C2")
+stopifnot(sum(c1_endpoint$aggregation_level == "LEVEL3_MIXTURE_MEDIAN") == 2L)
+stopifnot(sum(c2_endpoint$aggregation_level == "LEVEL3_MIXTURE_MEDIAN") == 2L)
+stopifnot(all(c1_endpoint$status == "SUCCESS"), all(c2_endpoint$status == "SUCCESS"))
+
+mock_fraction <- matrix(
+  c(0.7, 0.3, 0.2, 0.8), nrow = 2L, byrow = TRUE,
+  dimnames = list(c("sample_1", "sample_2"), c("A", "B"))
+)
+stopifnot(identical(
+  ctse_coerce_fraction(mock_fraction, c("sample_1", "sample_2"), c("A", "B")),
+  mock_fraction
+))
+mock_expression <- matrix(
+  1:6, nrow = 2L,
+  dimnames = list(c("sample_1", "sample_2"), c("gene_1", "gene_2", "gene_3"))
+)
+stopifnot(identical(
+  ctse_coerce_expression(mock_expression, c("sample_1", "sample_2"), "A"),
+  t(mock_expression)
+))
+
+cat("All study companion tests passed.\n")
