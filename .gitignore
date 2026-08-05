@@ -11,6 +11,9 @@ provenance/
 reports/
 contracts/
 audits/
+release/
+output/
+outputs/
 
 # Local or machine-specific files.
 .env
@@ -27,5 +30,6 @@ __pycache__/
 *.tar
 *.tar.gz
 *.7z
+.Rproj.user
 .DS_Store
 Thumbs.db
