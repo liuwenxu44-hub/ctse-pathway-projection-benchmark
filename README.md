@@ -1,8 +1,8 @@
 # CTSE pathway-projection benchmark
 
-This repository provides a small, executable and failure-aware implementation of a downstream signed pathway-projection benchmark for cell-type-specific expression (CTSE) estimates.
+This repository provides the executable, failure-aware code companion for a controlled cell-type-specific expression (CTSE) benchmark and its downstream signed pathway-projection evaluation.
 
-It intentionally contains no manuscript, study data, source data, figures, result tables, checkpoints, analysis-environment records, machine paths, author metadata, funding information or contribution statements.
+It includes the prespecified simulation generator, method wrappers, canonical adapters and endpoint calculations. It intentionally contains no manuscript, study data, figures, result tables, checkpoints, analysis-environment records, machine paths, author metadata, funding information or contribution statements.
 
 ## What the benchmark does
 
@@ -14,6 +14,14 @@ The workflow has four stages:
 2. Apply the same predefined pathway gene set and sample-group contrast to every method.
 3. Calculate the signed pathway projection with a method-independent adapter.
 4. Record endpoint values and structured failures without replacing, imputing or silently dropping failed tasks.
+
+The study companion additionally provides:
+
+- the six frozen controlled-simulation scenarios;
+- deterministic reference and bulk generation;
+- the shared NNLS fraction input;
+- parameterized BayesPrism, Unico and TCA calls;
+- gene, fraction, SNE, external-proxy and paired-bootstrap endpoints.
 
 The projection for pathway weights `w` and a cell-type-specific group contrast `delta` is:
 
@@ -30,6 +38,9 @@ The implementation uses base R only.
 ```r
 source("R/ctse_benchmark.R")
 source("R/adapters.R")
+source("R/simulation.R")
+source("R/method_wrappers.R")
+source("R/study_endpoints.R")
 
 result <- run_ctse_benchmark(
   estimate = ctse_tensor,
@@ -45,9 +56,10 @@ Run the included checks and synthetic example from the repository root:
 ```bash
 Rscript tests/run_tests.R
 Rscript examples/minimal_example.R
+Rscript examples/simulation_case.R
 ```
 
-See [docs/USAGE.md](docs/USAGE.md) for the input contract, validation rules, adapters, output schema and failure policy.
+See [docs/USAGE.md](docs/USAGE.md) for the input contract, validation rules, adapters, output schema and failure policy, and [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for the exact public-code boundary.
 
 ## Public data
 
@@ -59,4 +71,4 @@ The code in this repository is released under the [MIT License](LICENSE). That s
 
 ## Repository boundary
 
-This repository contains the reusable benchmark interface only. It does not reproduce study-specific method fitting without user-supplied CTSE outputs, metadata and prespecified pathway definitions. Data, manuscript materials, scientific results and submission assets are not distributed here.
+This repository contains the study's reusable simulation, method-call and endpoint implementation. Reproducing data-dependent analyses requires user-supplied GEO downloads or canonical CTSE outputs. Data, scientific results, operational infrastructure, manuscript materials and submission assets are not distributed here.

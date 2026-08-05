@@ -1,9 +1,12 @@
 # Usage guide
 
-The repository exposes two base-R source files:
+The repository exposes five R source files:
 
 - `R/ctse_benchmark.R`: validation, projection, vector metrics, structured task execution and atomic output;
-- `R/adapters.R`: deterministic conversion of common array/list layouts to `gene × cell_type × sample`.
+- `R/adapters.R`: deterministic conversion of common array/list layouts to `gene × cell_type × sample`;
+- `R/simulation.R`: the frozen simulation design, generators, truth and shared NNLS input;
+- `R/method_wrappers.R`: parameterized BayesPrism, Unico and TCA calls;
+- `R/study_endpoints.R`: simulation and external-validation endpoint aggregation.
 
 Source both files from the repository root before use.
 
@@ -51,7 +54,7 @@ For simulations, the truth tensor must use the same dimensions and identifiers a
 
 ## 2. Convert method output
 
-The benchmark does not call or tune a deconvolution method. Supply its completed output and convert it deterministically:
+You may supply a completed method output and convert it deterministically:
 
 ```r
 # Already canonical: gene × cell type × sample
@@ -65,6 +68,8 @@ x <- canonicalize_celltype_matrices(raw_list, genes, cell_types, samples)
 ```
 
 Adapters validate dimensions, identifier order, duplicates and finite values. They never fill, impute, filter or rescale genes.
+
+Alternatively, source `R/method_wrappers.R` to use the study-parameterized BayesPrism 2.2.3, Unico 0.1.0 or TCA 1.2.1 call. These wrappers do not install dependencies, tune failed fits or retry. Thrown method and numerical errors are returned as structured failures. BayesPrism internally dropped genes are recorded on the actual returned universe rather than filled or imputed.
 
 ## 3. Validate before scoring
 
@@ -163,3 +168,21 @@ This guide does not provide or expose:
 - author, affiliation, funding, or contribution metadata.
 
 The MIT licence applies to this repository's code. It does not alter the terms of third-party datasets or third-party method packages.
+
+## 8. Controlled simulation and study endpoints
+
+Generate one frozen-design simulation case without private inputs:
+
+```r
+source("R/ctse_benchmark.R")
+source("R/simulation.R")
+
+design <- ctse_simulation_design()
+profiles <- ctse_population_profiles("complete_cancellation", design)
+bulk <- ctse_generate_bulk("complete_cancellation", 1L, design, profiles)
+truth <- ctse_truth_tensor(profiles, bulk$metadata)
+```
+
+The defaults reproduce the six-scenario, 2,000-gene, four-cell-type controlled design, its reference and bulk RNG streams, and 20 samples per group. `ctse_generate_reference()` produces the six-donor reference. `ctse_shared_nnls_fraction()` requires the CRAN `nnls` package.
+
+`R/study_endpoints.R` supplies fraction and gene accuracy tables, task summaries, scale-normalized error via `ctse_vector_metrics()`, deterministic bootstrap intervals, paired method comparisons, and the three-level C1/C2 external-proxy aggregation. Technical libraries are summarized within cell-type-by-mixture units before the mixture-level median; C1 and C2 remain separate.

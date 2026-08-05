@@ -12,6 +12,12 @@ ctse_assert <- function(ok, code, detail = "") {
   invisible(TRUE)
 }
 
+ctse_set_rng <- function(seed) {
+  RNGkind(kind = "Mersenne-Twister", normal.kind = "Inversion", sample.kind = "Rejection")
+  set.seed(as.integer(seed))
+  invisible(seed)
+}
+
 ctse_validate_identifiers <- function(values, axis) {
   ctse_assert(is.character(values), "IDENTIFIER_TYPE", axis)
   ctse_assert(length(values) > 0L, "IDENTIFIER_EMPTY_AXIS", axis)
