@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "image_id": "sha256:5c15422fec5a71014f8d0e10ba502bebaa8b97da6caecac62e7add8f1ab475c5",
+  "network": "none",
+  "host_home_mount": false,
+  "host_R_libraries_mounted": false,
+  "method_packages_installed": false,
+  "model_fits": 0,
+  "results": [
+    {
+      "test": 1,
+      "command": [
+        "Rscript",
+        "--vanilla",
+        "tests/run_tests.R"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 2,
+      "command": [
+        "Rscript",
+        "--vanilla",
+        "study/tests/test_semantics.R"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 3,
+      "command": [
+        "Rscript",
+        "--vanilla",
+        "study/tests/test_reference_endpoints.R",
+        "study/lib/reference_endpoints.R",
+        "study/lib/endpoint_math.R",
+        "/outputs/reference-artificial"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 4,
+      "command": [
+        "python3",
+        "study/tests/test_reference_summaries.py",
+        "--artificial-r-directory",
+        "/outputs/reference-artificial",
+        "--evidence-output",
+        "/outputs/python-reference-tests.json"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 5,
+      "command": [
+        "python3",
+        "repro/privacy_guard.py",
+        "."
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 6,
+      "command": [
+        "python3",
+        "repro/test_tools.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 7,
+      "command": [
+        "python3",
+        "study/tests/test_archive.py",
+        "/outputs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "test": 8,
+      "command": [
+        "Rscript",
+        "--vanilla",
+        "-e",
+        "source(\"R/ctse_benchmark.R\");source(\"R/epic_scale_contract.R\");source(\"study/model_source/simulation_canonical.R\");source(\"study/model_source/frozen_calls.R\");invisible(lapply(list.files(\"study/model_source\",pattern=\"[.]R$\",full.names=TRUE),parse));stopifnot(!any(c(\"EPICunmix\",\"Unico\",\"TCA\",\"BayesPrism\")%in%loadedNamespaces()));cat(\"SOURCE_PARSE_PASS_NO_FITS\\n\")"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

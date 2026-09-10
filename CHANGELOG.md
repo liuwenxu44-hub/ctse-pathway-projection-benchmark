@@ -1,5 +1,9 @@
 # Changelog
 
+Validation evidence for v0.3.0: two isolated derived builds, 129/129 byte-identical
+tables between builds, eight artificial-test entrypoints passed, and all 2,321
+public RDS files passed recursive privacy inspection. See verification/.
+
 ## v0.3.0 — expanded frozen-evidence reproduction
 
 - Corrected EPIC, CellBench, six-scenario positive controls, reference-regime

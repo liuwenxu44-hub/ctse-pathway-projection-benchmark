@@ -19,6 +19,10 @@ does not construct one cross-scale ranking of all methods.
 Large numeric inputs and expected tables are release assets, not Git objects.
 Manuscripts, figures, logs, machine paths and private configuration are excluded.
 
+Two independent isolated derived rebuilds passed: all 129 scientific tables are
+byte-identical between builds. [Executed validation evidence](verification/VALIDATION_SUMMARY.md)
+includes table-level hashes, frozen-result reconciliation and explicit test limits.
+
 ## Rebuild frozen evidence
 
 Linux x86-64, Docker and host Python 3.10+ are required. Allow approximately 60 GB
@@ -68,6 +72,7 @@ supplied, but new four-method fits were not executed in this engineering release
 - [Reusable R API](docs/USAGE.md)
 - [Third-party terms](THIRD_PARTY_NOTICES.md)
 - [Changelog](CHANGELOG.md)
+- [Executed tests and data/source integrity](verification/VALIDATION_SUMMARY.md)
 
 Experimental sources include [CellBench GSE118767](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118767).
 The earlier GSE220605/GSE220606 case remains a restricted historical assessment,
