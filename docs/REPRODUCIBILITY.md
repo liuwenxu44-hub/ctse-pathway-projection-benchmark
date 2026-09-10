@@ -30,6 +30,11 @@ frozen responses, fractions, references and posteriors separately from truth.
 No model/NNLS was rerun for this public version. Cross-machine stochastic fit
 identity and a complete new download-and-refit workflow are not certified.
 
+[Historical execution lineage](HISTORICAL_EXECUTION_LINEAGE.md) discloses the
+18 imported versus 102 recovered original BayesPrism outputs, the unavailable
+initial whole-source generation, and the earlier four corrective EPIC stage2 fits.
+Zero new fits here must not be read as zero historical recovery/correction fits.
+
 The legacy R/method_wrappers.R is retained for compatibility. Its parameters
 must not be substituted for later simulation calls. Current simulation and
 CellBench configurations are explicitly separated in frozen_calls.R.
