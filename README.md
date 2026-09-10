@@ -1,74 +1,76 @@
-# CTSE pathway-projection benchmark
+# CTSE expression and signed-projection reproducibility companion
 
-This repository provides the executable, failure-aware code companion for a controlled cell-type-specific expression (CTSE) benchmark and its downstream signed pathway-projection evaluation.
+Source code and versioned scientific data for a cell-type-specific expression
+(CTSE) benchmark. Static gene-profile agreement, sample-specific change recovery,
+normalized direction and change magnitude are evaluated separately. This project
+does not construct one cross-scale ranking of all methods.
 
-It includes the prespecified simulation generator, method wrappers, canonical adapters and endpoint calculations. It intentionally contains no manuscript, study data, figures, result tables, checkpoints, analysis-environment records, machine paths, author metadata, funding information or contribution statements.
+## v0.3.0
 
-## What the benchmark does
+- Six frozen scenarios × 20 units; 2,000 genes, four cell types and 40 samples/unit.
+- Original pooled-reference and state0-reference results for BayesPrism, Unico,
+  TCA and EPIC-unmix; Reference-only, Bulk-copy and Always-zero controls.
+- Corrected CellBench CEL-seq2/SORT-seq outputs, separate C1/C2 eligibility,
+  practical/oracle arms, returned genes and Reactome V97 membership.
+- Saved chains from the bounded EPIC diagnostic design.
+- Exact frozen endpoint kernels, scientific manifests, locked dependencies,
+  negative tests and clean-container reproduction.
 
-The benchmark evaluates whether a CTSE method preserves a prespecified signed pathway contrast after the method output has been converted to a common tensor representation.
+Large numeric inputs and expected tables are release assets, not Git objects.
+Manuscripts, figures, logs, machine paths and private configuration are excluded.
 
-The workflow has four stages:
+## Rebuild frozen evidence
 
-1. Prepare CTSE estimates in a common gene-by-cell-type-by-sample layout.
-2. Apply the same predefined pathway gene set and sample-group contrast to every method.
-3. Calculate the signed pathway projection with a method-independent adapter.
-4. Record endpoint values and structured failures without replacing, imputing or silently dropping failed tasks.
-
-The study companion additionally provides:
-
-- the six frozen controlled-simulation scenarios;
-- deterministic reference and bulk generation;
-- the shared NNLS fraction input;
-- parameterized BayesPrism, Unico and TCA calls;
-- gene, fraction, SNE, external-proxy and paired-bootstrap endpoints.
-
-The projection for pathway weights `w` and a cell-type-specific group contrast `delta` is:
-
-```text
-sum(w * delta[pathway genes]) / (sqrt(sum(w^2)) * ||delta||2)
-```
-
-The denominator uses the full-gene contrast norm. When all pathway weights are `1`, this reduces to the size-normalized formula used by the accompanying study.
-
-## How to use it
-
-The implementation uses base R only.
-
-```r
-source("R/ctse_benchmark.R")
-source("R/adapters.R")
-source("R/simulation.R")
-source("R/method_wrappers.R")
-source("R/study_endpoints.R")
-
-result <- run_ctse_benchmark(
-  estimate = ctse_tensor,
-  sample_metadata = sample_metadata,
-  pathway = pathway_definition,
-  group0 = "control",
-  group1 = "case"
-)
-```
-
-Run the included checks and synthetic example from the repository root:
+Linux x86-64, Docker and host Python 3.10+ are required. Allow approximately 60 GB
+disk space for downloads, inputs and two rebuilds. Run from the repository root:
 
 ```bash
-Rscript tests/run_tests.R
-Rscript examples/minimal_example.R
-Rscript examples/simulation_case.R
+python3 repro/download_data.py --destination data-v0.3.0
+python3 repro/prepare_runtime.py environment
+docker build -t ctse-derived:0.3.0 environment
+mkdir -p local-rebuilds
+docker run --rm --network none --read-only --cap-drop=ALL \
+  --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
+  --tmpfs /tmp:rw,nosuid,size=8g \
+  -v "$PWD:/work:ro" -v "$PWD/data-v0.3.0:/inputs:ro" \
+  -v "$PWD/local-rebuilds:/outputs" -w /work ctse-derived:0.3.0 \
+  python3 repro/run.py --data /inputs --output /outputs/A --jobs 4
 ```
 
-See [docs/USAGE.md](docs/USAGE.md) for the input contract, validation rules, adapters, output schema and failure policy, and [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) for the exact public-code boundary.
+Repeat with /outputs/B for an independent derived rebuild. The runner verifies
+input hashes, reconstructs tables, checks the closed expected inventory, and
+rechecks inputs. See the fixed [comparison policy](repro/COMPARISON_POLICY.md).
 
-## Public data
+**No model or NNLS is fitted by this command.** The tested route is frozen
+output → derived endpoint/summary. Fitting source and prepared inputs are also
+supplied, but new four-method fits were not executed in this engineering release.
 
-No public data are redistributed. The experimental-mixture source datasets remain available from NCBI GEO under [GSE220605](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220605) and [GSE220606](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE220606), subject to the source repository and original-study terms.
+## Scientific boundaries
 
-## Licence
+- Four-method gene-vector Spearman uses identical actual support within each
+  comparison; different support contexts are never pooled into extra replicates.
+- Unico/TCA linear CPM and EPIC native-log secondary endpoints remain separate.
+  No clipping, forced exponentiation or arbitrary scaling creates comparability.
+- Historical BayesPrism direction results retain their original contribution/
+  profile target, not a common conditional-expression amplitude interpretation.
+- C1/C2 are separate proxies, not absolute truth. Composition is the CellBench
+  descriptive unit after frozen mass-stratum aggregation.
+- Failure, abstention, undefined correlation and semantic non-comparability are
+  distinct; none is imputed as zero.
+- The 0.05 direction threshold is not a p-value. A nonzero normalized direction
+  can coexist with very small change magnitude.
 
-The code in this repository is released under the [MIT License](LICENSE). That software licence does not relicense third-party GEO data.
+## Documentation
 
-## Repository boundary
+- [Reproduction coverage and limits](docs/REPRODUCIBILITY.md)
+- [Data dictionary](docs/DATA_DICTIONARY.md)
+- [Model source and scale contracts](docs/MODEL_EXECUTION.md)
+- [Reusable R API](docs/USAGE.md)
+- [Third-party terms](THIRD_PARTY_NOTICES.md)
+- [Changelog](CHANGELOG.md)
 
-This repository contains the study's reusable simulation, method-call and endpoint implementation. Reproducing data-dependent analyses requires user-supplied GEO downloads or canonical CTSE outputs. Data, scientific results, operational infrastructure, manuscript materials and submission assets are not distributed here.
+Experimental sources include [CellBench GSE118767](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118767).
+The earlier GSE220605/GSE220606 case remains a restricted historical assessment,
+not a newly rerun validation layer. Original repository code uses the
+[MIT License](LICENSE), which does not relicense third-party methods or datasets.
+No DOI is assigned or implied for this release.

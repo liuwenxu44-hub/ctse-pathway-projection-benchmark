@@ -15,7 +15,8 @@ ctse_fraction_accuracy <- function(estimate, truth) {
   )
 }
 
-ctse_gene_accuracy <- function(estimate, truth) {
+ctse_gene_accuracy <- function(estimate, truth, comparison_contract = NULL) {
+  ctse_require_comparison_contract(comparison_contract)
   ctse_assert(is.array(estimate) && is.array(truth) &&
                 identical(dim(estimate), dim(truth)) &&
                 identical(dimnames(estimate), dimnames(truth)),
@@ -27,7 +28,7 @@ ctse_gene_accuracy <- function(estimate, truth) {
       index <- index + 1L
       x <- estimate[, cell_type, sample]
       y <- truth[, cell_type, sample]
-      metric <- ctse_vector_metrics(x, y)
+      metric <- ctse_vector_metrics(x, y, comparison_contract = comparison_contract)
       rows[[index]] <- data.frame(
         sample_id = sample, cell_type = cell_type,
         pearson = metric$pearson, spearman = metric$spearman,
@@ -97,13 +98,16 @@ ctse_paired_method_comparison <- function(data, method_a, method_b,
 }
 
 ctse_external_endpoint_levels <- function(estimate, proxy, sample_map,
-                                          proxy_name = c("C1", "C2")) {
+                                          proxy_name = c("C1", "C2"),
+                                          comparison_contract = NULL) {
+  ctse_require_comparison_contract(comparison_contract)
   proxy_name <- match.arg(proxy_name)
   ctse_assert(is.array(estimate) && length(dim(estimate)) == 3L,
               "EXTERNAL_ESTIMATE_SCHEMA")
   ctse_assert(is.data.frame(sample_map) &&
                 all(c("sample_id", "mixture_id", "replicate_id") %in% names(sample_map)),
               "EXTERNAL_SAMPLE_MAP_SCHEMA")
+  ctse_assert(!anyDuplicated(sample_map$sample_id), "EXTERNAL_SAMPLE_ID_DUPLICATED")
   sample_map <- sample_map[match(dimnames(estimate)[[3L]], sample_map$sample_id), , drop = FALSE]
   ctse_assert(!anyNA(sample_map$sample_id), "EXTERNAL_SAMPLE_MAP_KEYS")
   genes <- dimnames(estimate)[[1L]]
@@ -127,7 +131,8 @@ ctse_external_endpoint_levels <- function(estimate, proxy, sample_map,
       reference <- if (proxy_name == "C1") proxy[, cell_type] else
         proxy[, cell_type, mixture_index]
       available <- all(is.finite(reference))
-      metric <- if (available) ctse_vector_metrics(estimate[, cell_type, sample], reference) else
+      metric <- if (available) ctse_vector_metrics(estimate[, cell_type, sample], reference,
+                                                  comparison_contract = comparison_contract) else
         data.frame(n = 0L, spearman = NA_real_, pearson = NA_real_, rmse = NA_real_,
                    reference_sd = NA_real_, sne = NA_real_)
       metric_success <- available && all(is.finite(unlist(

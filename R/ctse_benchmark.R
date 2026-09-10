@@ -134,11 +134,38 @@ classify_projection_direction <- function(value, tolerance = 0.05) {
                 ifelse(value > tolerance, "positive", "zero")))
 }
 
-ctse_vector_metrics <- function(estimate, reference, sd_floor = 1e-8) {
+ctse_comparison_contract <- function(estimate_unit, reference_unit,
+                                     estimate_target, reference_target,
+                                     contrast = "same_sample_same_gene_support") {
+  list(estimate_unit=estimate_unit, reference_unit=reference_unit,
+       estimate_target=estimate_target, reference_target=reference_target,
+       contrast=contrast)
+}
+
+ctse_require_comparison_contract <- function(contract) {
+  fields <- c("estimate_unit", "reference_unit", "estimate_target", "reference_target", "contrast")
+  ctse_assert(is.list(contract) && all(fields %in% names(contract)),
+              "EXPLICIT_UNIT_AND_ESTIMAND_CONTRACT_REQUIRED")
+  ctse_assert(all(vapply(contract[fields], function(x) is.character(x) &&
+                         length(x)==1L && !is.na(x) && nzchar(x), logical(1))),
+              "COMPARISON_CONTRACT_INCOMPLETE")
+  ctse_assert(identical(contract$estimate_unit, contract$reference_unit), "UNIT_COMPARISON_INVALID")
+  ctse_assert(identical(contract$estimate_target, contract$reference_target), "ESTIMAND_COMPARISON_INVALID")
+  invisible(TRUE)
+}
+
+ctse_vector_metrics <- function(estimate, reference, sd_floor = 1e-8,
+                                comparison_contract = NULL) {
+  ctse_require_comparison_contract(comparison_contract)
   ctse_assert(is.numeric(estimate) && is.numeric(reference), "VECTOR_TYPE_INVALID")
   ctse_assert(length(estimate) == length(reference), "VECTOR_LENGTH_MISMATCH")
+  if (!is.null(names(estimate)) || !is.null(names(reference)))
+    ctse_assert(identical(names(estimate), names(reference)) && !anyDuplicated(names(estimate)),
+                "VECTOR_GENE_ID_MISMATCH")
   ctse_assert(is.numeric(sd_floor) && length(sd_floor) == 1L &&
                 is.finite(sd_floor) && sd_floor > 0, "SD_FLOOR_INVALID")
+  ctse_assert(all(is.finite(estimate)) && all(is.finite(reference)),
+              "NONFINITE_VALUES_REQUIRE_EXPLICIT_FAILURE_OR_SUPPORT_HANDLING")
   keep <- is.finite(estimate) & is.finite(reference)
   n <- sum(keep)
   if (n < 2L) {
@@ -164,7 +191,9 @@ ctse_vector_metrics <- function(estimate, reference, sd_floor = 1e-8) {
 }
 
 compare_projection_to_truth <- function(estimated_projection, truth_projection,
-                                        direction_tolerance = 0.05) {
+                                        direction_tolerance = 0.05,
+                                        comparison_contract = NULL) {
+  ctse_require_comparison_contract(comparison_contract)
   required <- c("cell_type", "signed_projection")
   ctse_assert(is.data.frame(estimated_projection) && all(required %in% names(estimated_projection)),
               "ESTIMATED_PROJECTION_SCHEMA")
@@ -196,7 +225,8 @@ compare_projection_to_truth <- function(estimated_projection, truth_projection,
 run_ctse_benchmark <- function(estimate, sample_metadata, pathway, group0, group1,
                                truth = NULL,
                                direction_tolerance = 0.05,
-                               l2_tolerance = 1e-15) {
+                               l2_tolerance = 1e-15,
+                               comparison_contract = NULL) {
   tryCatch({
     projection <- signed_pathway_projection(
       estimate = estimate,
@@ -224,7 +254,7 @@ run_ctse_benchmark <- function(estimate, sample_metadata, pathway, group0, group
         l2_tolerance = l2_tolerance
       )
       comparison <- compare_projection_to_truth(
-        projection, truth_projection, direction_tolerance
+        projection, truth_projection, direction_tolerance, comparison_contract
       )
     }
     list(
