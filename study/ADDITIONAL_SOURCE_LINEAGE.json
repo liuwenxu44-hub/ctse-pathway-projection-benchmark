@@ -1,0 +1,37 @@
+[
+  {
+    "source_file": "archive_publish_v1.py",
+    "source_sha256": "923749b0a18f79b0004e6edbb0667e4160bf19b12b7d3e0968a6f7b7b07d7a3c",
+    "public_file": "repro/archive.py",
+    "public_sha256": "923749b0a18f79b0004e6edbb0667e4160bf19b12b7d3e0968a6f7b7b07d7a3c",
+    "transformation": "Byte-identical archive-only publisher; no model or numerical transformations"
+  },
+  {
+    "source_file": "archive_mock.py",
+    "source_sha256": "4db1e78fdc8eeb9b43d694ebf298144be4741dcbf04add6d62c22a46381bbf04",
+    "public_file": "study/tests/test_archive.py",
+    "public_sha256": "e357b234a76cd1e0afd49c2310d6075bd955420e6da067ac29870752b79bdc02",
+    "transformation": "Import path only; artificial tests unchanged"
+  },
+  {
+    "source_file": "SOURCE_run_formal_ctse_projection_benchmark.R",
+    "source_sha256": "b98b9e929bd9ab571bb0a3103b50d6e283cf488fadec40ac391038addc516497",
+    "public_file": "study/model_source/simulation_canonical.R",
+    "public_sha256": "c9431db3e24ab6d2ac5e1e77a496affdebd07ce733217b959c93f19d1c1c2cdb",
+    "transformation": "Exact named canonical helpers extracted; only assertion bindings supplied. BayesPrism helper source SHA256 476f86eb539b39d2b20b7b10a11550270ad7234465fe948b5a6b26cfc11d612f"
+  },
+  {
+    "source_file": "Q2_CTSE_M1A_METHOD_VERSION_ENVIRONMENT_MANIFEST_V1.csv",
+    "source_sha256": "971c3258a4c0500c5faba1882fa6821dff4a816aae34f16162b00cc2544138bc",
+    "public_file": "study/model_source/versions.tsv",
+    "public_sha256": "ebe3aab1a53783bf0b215bd1b44cab77ba42bf7170608f047cab820e6f51ec54",
+    "transformation": "Allowlisted software identities only; machine environment column omitted. License field is historical source metadata, see THIRD_PARTY_NOTICES.md"
+  },
+  {
+    "source_file": "CORRECTIVE_TASK_REGISTRY.tsv",
+    "source_sha256": "f72f769d48e4548e42615603414aea7379490587daded7675429f8f476f026af",
+    "public_file": "study/model_source/cellbench-corrective-tasks.tsv",
+    "public_sha256": "f72f769d48e4548e42615603414aea7379490587daded7675429f8f476f026af",
+    "transformation": "Registered correction metadata; path columns omitted"
+  }
+]

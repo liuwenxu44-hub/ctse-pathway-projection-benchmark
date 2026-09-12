@@ -1,0 +1,8 @@
+public_function	frozen_source	frozen_operation	interface_change	fresh_model_execution_verified_this_release
+simulation_unico_call	reference_fit.R;run_formal_ctse_projection_benchmark.R	Unico::Unico defaults; Unico::tensor	Explicit public input argument; no private filesystem driver	NO
+simulation_tca_call	reference_fit.R;run_formal_ctse_projection_benchmark.R	TCA::tca max_iters=10 refit_W=FALSE; tensor scale=FALSE	Explicit public input argument; no private filesystem driver	NO
+simulation_bayesprism_call	reference_fit.R;SOURCE_historical_bayesprism_runner.R	new.prism count.matrix; run.prism n.cores=1; get.exp; declared unit-sum type profile	Reference supplied explicitly; evaluation fields rejected	NO
+cellbench_unico_call	formal_task_worker_recovery_v1.R	Frozen CellBench Unico parameters and one execution-only gene exclusion	Log directory parameterized; no automatic task launch	NO
+cellbench_tca_call	formal_task_worker_recovery_v1.R	Frozen CellBench TCA parameters; tensor scale=FALSE	Log directory parameterized; no automatic task launch	NO
+cellbench_epic_corrected_stage2_call	correct_stage2.R	Corrected persisted log response; reused stage1 posterior; unchanged stage2 call	Inputs supplied explicitly; no old invalid stage2 object read	NO
+run_first;run_second;prior_from_reference;canon	epic_adapter.R	Frozen corrected simulation two-stage calls and canonical axis mapping	Machine library paths removed only	NO

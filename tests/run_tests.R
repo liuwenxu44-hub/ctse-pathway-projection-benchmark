@@ -3,6 +3,8 @@ source("R/adapters.R")
 source("R/simulation.R")
 source("R/method_wrappers.R")
 source("R/study_endpoints.R")
+toy_contract <- ctse_comparison_contract("artificial_linear", "artificial_linear", "artificial", "artificial")
+prob_contract <- ctse_comparison_contract("probability", "probability", "conditional_profile", "conditional_profile")
 
 genes <- paste0("g", seq_len(6L))
 cell_types <- c("A", "B")
@@ -34,14 +36,15 @@ stopifnot(isTRUE(all.equal(projection$signed_projection, scaled$signed_projectio
 directions <- classify_projection_direction(c(-0.051, -0.05, 0, 0.05, 0.051, NA_real_))
 stopifnot(identical(directions, c("negative", "zero", "zero", "zero", "positive", NA_character_)))
 
-metrics <- ctse_vector_metrics(c(1, 2, 3), c(1, 2, 4))
+metrics <- ctse_vector_metrics(c(1, 2, 3), c(1, 2, 4), comparison_contract = toy_contract)
 stopifnot(metrics$n == 3L, is.finite(metrics$sne), metrics$sne >= 0)
 
 success <- run_ctse_benchmark(x, metadata, pathway, "control", "case")
 stopifnot(identical(success$status, "SUCCESS"), nrow(success$projection) == 2L)
 stopifnot(is.null(success$comparison))
 
-with_truth <- run_ctse_benchmark(x, metadata, pathway, "control", "case", truth = x)
+with_truth <- run_ctse_benchmark(x, metadata, pathway, "control", "case", truth = x,
+                                comparison_contract = toy_contract)
 stopifnot(identical(with_truth$status, "SUCCESS"))
 stopifnot(all(with_truth$comparison$absolute_error == 0))
 stopifnot(all(with_truth$comparison$direction_correct))
@@ -83,7 +86,7 @@ stopifnot(identical(dim(truth_tensor), c(2000L, 4L, 8L)))
 
 simulation_result <- run_ctse_benchmark(
   truth_tensor, bulk$metadata, ctse_simulation_pathways(design)$signal,
-  "group0", "group1", truth = truth_tensor
+  "group0", "group1", truth = truth_tensor, comparison_contract = prob_contract
 )
 stopifnot(simulation_result$status == "SUCCESS")
 stopifnot(all(simulation_result$comparison$absolute_error == 0))
@@ -92,7 +95,7 @@ fraction_accuracy <- ctse_fraction_accuracy(
   bulk$oracle_compositions, bulk$oracle_compositions
 )
 stopifnot(all(fraction_accuracy$absolute_error == 0))
-gene_accuracy <- ctse_gene_accuracy(truth_tensor, truth_tensor)
+gene_accuracy <- ctse_gene_accuracy(truth_tensor, truth_tensor, prob_contract)
 stopifnot(all(gene_accuracy$rmse == 0))
 interval <- ctse_bootstrap_mean_ci(1:10, seed = 20260729L, resamples = 100L)
 stopifnot(interval[["estimate"]] == 5.5)
@@ -110,8 +113,8 @@ c2_proxy <- array(
 )
 c2_proxy[, , 1L] <- profiles[, , "state0"]
 c2_proxy[, , 2L] <- profiles[, , "state1"]
-c1_endpoint <- ctse_external_endpoint_levels(truth_tensor, c1_proxy, sample_map, "C1")
-c2_endpoint <- ctse_external_endpoint_levels(truth_tensor, c2_proxy, sample_map, "C2")
+c1_endpoint <- ctse_external_endpoint_levels(truth_tensor, c1_proxy, sample_map, "C1", prob_contract)
+c2_endpoint <- ctse_external_endpoint_levels(truth_tensor, c2_proxy, sample_map, "C2", prob_contract)
 stopifnot(sum(c1_endpoint$aggregation_level == "LEVEL3_MIXTURE_MEDIAN") == 2L)
 stopifnot(sum(c2_endpoint$aggregation_level == "LEVEL3_MIXTURE_MEDIAN") == 2L)
 stopifnot(all(c1_endpoint$status == "SUCCESS"), all(c2_endpoint$status == "SUCCESS"))

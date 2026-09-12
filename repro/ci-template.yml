@@ -1,0 +1,38 @@
+# Optional Actions template. It is not activated by this release.
+# Activation requires repository credentials with workflow permission.
+name: Derived contracts and artificial regression tests
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  artificial-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Source privacy gate
+        run: python3 repro/privacy_guard.py .
+      - name: Download and verify exact runtime inputs
+        run: python3 repro/prepare_runtime.py environment
+      - name: Build derived-only environment
+        run: docker build -t ctse-derived:ci environment
+      - name: Isolated artificial checks (no study fits)
+        shell: bash
+        run: |
+          mkdir -p .ci-output/audits
+          run() {
+            docker run --rm --network none --read-only --cap-drop=ALL \
+              --security-opt=no-new-privileges --user "$(id -u):$(id -g)" \
+              --tmpfs /tmp:rw,nosuid,size=2g \
+              -v "$PWD:/work:ro" -v "$PWD/.ci-output:/outputs" -w /work ctse-derived:ci "$@"
+          }
+          run Rscript --vanilla tests/run_tests.R
+          run Rscript --vanilla study/tests/test_semantics.R
+          run python3 repro/test_tools.py
+          run python3 study/tests/test_archive.py /outputs
+          run Rscript --vanilla study/tests/test_reference_endpoints.R study/lib/reference_endpoints.R study/lib/endpoint_math.R /outputs/reference-artificial
+          run python3 study/tests/test_reference_summaries.py --artificial-r-directory /outputs/reference-artificial --evidence-output /outputs/reference-summary-tests.json

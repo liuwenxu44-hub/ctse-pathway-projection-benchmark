@@ -1,0 +1,33 @@
+suppressPackageStartupMessages(library(EPICunmix))
+sha<-function(p)unname(tools::sha256sum(p))
+tsv<-function(x,p)write.table(x,p,sep='\t',quote=FALSE,row.names=FALSE,na='NA')
+rdtab<-function(p)read.delim(p,check.names=FALSE,stringsAsFactors=FALSE,quote='',comment.char='')
+full_log<-function(B)log2(sweep(B,2,colSums(B),'/')*1e6+1)
+install_shim<-function(){
+ ns<-parent.env(asNamespace('EPICunmix'))
+ if(bindingIsLocked('makeCluster',ns))unlockBinding('makeCluster',ns)
+ assign('makeCluster',function(spec,...)parallel::makeCluster(1L,type='FORK'),envir=ns);lockBinding('makeCluster',ns)
+}
+prior_from_reference<-function(counts,meta,cells){
+ stopifnot(identical(colnames(counts),as.character(meta$cell_id)),!anyNA(meta$donor_id),setequal(meta$cell_type,cells))
+ # Real original synthetic donor labels, not one invented donor per cell/state.
+ cm<-setNames(paste0('c',seq_along(cells)),cells)
+ p<-EPICunmix::get_prior(sc=counts,sample=as.character(meta$donor_id),cell_type=unname(cm[meta$cell_type]),filter_pd=TRUE)
+ stopifnot(all(c('profile','covariance')%in%names(p)),identical(colnames(p$profile),unname(cm)),identical(rownames(p$profile),rownames(p$covariance)),all(is.finite(p$profile)),all(is.finite(p$covariance)))
+ p
+}
+run_first<-function(a,seed){
+ stopifnot(identical(dimnames(a$L),list(a$genes,a$sample_alias)),identical(dimnames(a$W),list(a$sample_alias,a$cell_alias)),identical(dimnames(a$prior$profile),list(a$genes,a$cell_alias)))
+ EPICunmix::bMIND(bulk=a$L,frac=a$W,profile=a$prior$profile,covariance=a$prior$covariance,ncore=1,nu=50,nitt=1300,burnin=300,thin=1,log2transf=FALSE,seed=as.integer(seed))
+}
+run_second<-function(a,first,seed){
+ g<-rownames(first$A);stopifnot(!anyDuplicated(g),all(g%in%a$genes),identical(g,a$genes[a$genes%in%g]),identical(dimnames(first$A)[[2]],a$cell_alias),identical(dimnames(first$A)[[3]],a$sample_alias))
+ EPICunmix::run_epic_unmix(bulk=a$L[g,,drop=FALSE],frac=a$W,input_cts=first,outf=FALSE,nstop=1,delta=.1,nu0=50,nu1=50,seed=as.integer(seed),ncore=1)
+}
+canon<-function(raw,a){
+ X<-raw$A;stopifnot(length(dim(X))==3L,all(is.finite(X)),!anyDuplicated(rownames(X)),setequal(dimnames(X)[[2]],a$cell_alias),setequal(dimnames(X)[[3]],a$sample_alias),all(rownames(X)%in%a$full_genes))
+ g<-a$full_genes[a$full_genes%in%rownames(X)]
+ X<-X[g,a$cell_alias,a$sample_alias,drop=FALSE]
+ dimnames(X)<-list(g,a$cell_ids,a$sample_ids)
+ list(schema='SIMULATION_EPIC_NATIVE_LOG_CPM_V1',tensor=X,scale='conditional_log2_CPM2000_plus_1',transform='EXPLICIT_REVERSIBLE_ID_MAP_ONLY')
+}

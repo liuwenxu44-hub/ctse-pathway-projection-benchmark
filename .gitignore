@@ -1,4 +1,4 @@
-# Never publish project materials from this documentation-only repository.
+# Local/private materials and large assets stay outside the source tree.
 manuscript/
 submission*/
 figures/
@@ -14,6 +14,13 @@ audits/
 release/
 output/
 outputs/
+data-v*/
+local-rebuilds/
+.ci-output/
+.asset-cache/
+environment/debs/
+environment/r-sources/
+environment/wheels/
 
 # Local or machine-specific files.
 .env

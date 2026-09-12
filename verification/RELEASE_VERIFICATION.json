@@ -1,0 +1,119 @@
+{
+  "status": "PASS",
+  "comparison_policy": "repro/COMPARISON_POLICY.md",
+  "derived_builds": 2,
+  "scientific_tables_per_build": 129,
+  "components": {
+    "simulation": 25,
+    "reference": 55,
+    "diagnostics": 29,
+    "cellbench": 20
+  },
+  "double_rebuild_byte_identical_tables": 129,
+  "frozen_comparison_status_counts": {
+    "BYTE_IDENTICAL": 234,
+    "NUMERIC_MATCH_WITH_DECLARED_ROUNDOFF": 18,
+    "EXACT_VALUES_ROW_ORDER_OR_SERIALIZATION_ONLY": 6
+  },
+  "maximum_absolute_frozen_difference": 1.0436096431476471e-14,
+  "scientific_input_files": 2526,
+  "data_manifest_sha256": "d9fdf6e297f420f13681312f235f5f35eb80c402daf327fc6f594a385d3d4915",
+  "public_data_archive_roundtrip": "ALL_HASHES_IDENTICAL",
+  "public_text_privacy": "PASS",
+  "public_rds_scanned": 2321,
+  "new_model_fits": 0,
+  "new_NNLS_fits": 0,
+  "manuscripts_modified": 0,
+  "figures_modified": 0,
+  "hosted_CI": "NOT_ACTIVATED_WORKFLOW_PERMISSION_UNAVAILABLE",
+  "runtime_image_id": "sha256:5c15422fec5a71014f8d0e10ba502bebaa8b97da6caecac62e7add8f1ab475c5",
+  "network_during_tests": "none",
+  "host_R_libraries_mounted": false,
+  "test_entrypoints_passed": 8,
+  "semantic_checks_passed": 30,
+  "tool_negative_checks_passed": 16,
+  "archive_checks_passed": 6,
+  "runtime_source_downloads_verified": 27,
+  "executed_scientific_source": [
+    {
+      "file": "repro/COMPARISON_POLICY.md",
+      "sha256": "3a06f6c216dfd05ec722a616db97b739cb2a5316be6fb4d08a20fb6c62c93cbd"
+    },
+    {
+      "file": "repro/run.py",
+      "sha256": "b30a6d4fc0982d93793a485c0f530a90a330187dbc1295f12efc665a349d965f"
+    },
+    {
+      "file": "repro/verify.py",
+      "sha256": "868bf3e108f4f4b6456b790e2319c5be5e9f21042f93e66532257a9078e2ad50"
+    },
+    {
+      "file": "study/lib/cellbench_math.R",
+      "sha256": "61c832d69baacbc36e318086e478299dd667dedcca76f2743b16a82cb240bb3f"
+    },
+    {
+      "file": "study/lib/cts_from_draws.R",
+      "sha256": "5c500096f61de43d3ca84817ed02ed90671e83806d16748717f77ef7771607f5"
+    },
+    {
+      "file": "study/lib/endpoint_math.R",
+      "sha256": "f5b5064baa0efe762611a82a87c8ffb839750942d9e26f82fb2b75612e3c5193"
+    },
+    {
+      "file": "study/lib/epic_diagnostics.R",
+      "sha256": "dc1c3d42122a4a90b17edd6e6311695d7d81d4de2381fb6b06bb313c5ac0c491"
+    },
+    {
+      "file": "study/lib/reference_endpoints.R",
+      "sha256": "11361dbc80fe9698e305fa7d0fb698488815b24fa6f68ab53ee887918592b20b"
+    },
+    {
+      "file": "study/lib/simulation_endpoints.R",
+      "sha256": "f4b6f67fc2dcfdaf8ba5eee31371e5e09a522ae8866c4a52e3d9855d24a73897"
+    },
+    {
+      "file": "study/rebuild_cellbench.R",
+      "sha256": "b5d74e8332f8e10f904776c4d8b098ee96850e95f8a2d0024b24a1438d941ad4"
+    },
+    {
+      "file": "study/rebuild_diagnostics.R",
+      "sha256": "751a80dfe1ae890738bc65656c6904f6ac3f99df306f43ff67ac7d4a070f72f2"
+    },
+    {
+      "file": "study/rebuild_reference.R",
+      "sha256": "27cc7580ca80665e05bc0a3974d33fcf976ce16e5b2332fb6e927f1dcaf23f8d"
+    },
+    {
+      "file": "study/rebuild_simulation.R",
+      "sha256": "75433d64df14c619597c09efd431bc44f7b5d466209c74fe0d4c8677bc3083ca"
+    },
+    {
+      "file": "study/summarize_cellbench.py",
+      "sha256": "c37f40feb1a10a93fd83575c205fde5e64d102372dbc07e2f5338cc93ccf677e"
+    },
+    {
+      "file": "study/summarize_diagnostics.py",
+      "sha256": "99f98d3aee2bb73c81611ad82fe7c6ca06fa8ead49837f73f89fde545b930b87"
+    },
+    {
+      "file": "study/summarize_reference.py",
+      "sha256": "866d9ceca998bf81a31becdc17a25fd2280005823957e4cde3f15393ed70f684"
+    },
+    {
+      "file": "study/summarize_simulation.py",
+      "sha256": "3dd59656384c46952d8268fa2ac32f3b5ee39205affa9f549ba4ea238c2701eb"
+    },
+    {
+      "file": "study/tests/test_reference_endpoints.R",
+      "sha256": "e943a433e16e4b154687922a6f7ee4a7990cb468c3e87c682e88919442aab8d6"
+    },
+    {
+      "file": "study/tests/test_reference_summaries.py",
+      "sha256": "274f95c687967d6aa791b6c95fee7185d01c51493b09052b1da3d90d35f8c7a5"
+    },
+    {
+      "file": "study/tests/test_semantics.R",
+      "sha256": "20a06f4b8fc83bd1bd1b6f66f2a74a4f3444e921603ca48f0b9b3595343eec45"
+    }
+  ]
+}

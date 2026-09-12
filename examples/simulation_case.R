@@ -22,7 +22,9 @@ result <- run_ctse_benchmark(
   pathway = pathway,
   group0 = "group0",
   group1 = "group1",
-  truth = truth
+  truth = truth,
+  comparison_contract = ctse_comparison_contract("probability", "probability",
+                                                  "conditional_profile", "conditional_profile")
 )
 
 stopifnot(result$status == "SUCCESS")

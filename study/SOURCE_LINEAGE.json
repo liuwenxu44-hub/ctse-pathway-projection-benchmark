@@ -1,0 +1,107 @@
+[
+  {
+    "source_file": "build_reference_endpoints.R",
+    "source_sha256": "c911f680186a9e6bb4bab07406c46bdaafc837313ee9c29a007a96cd9181ed60",
+    "public_file": "study/lib/reference_endpoints.R",
+    "public_sha256": "11361dbc80fe9698e305fa7d0fb698488815b24fa6f68ab53ee887918592b20b",
+    "transformation": "Exact sourceable scientific functions; removed private filesystem driver only"
+  },
+  {
+    "source_file": "endpoint_math.R",
+    "source_sha256": "f5b5064baa0efe762611a82a87c8ffb839750942d9e26f82fb2b75612e3c5193",
+    "public_file": "study/lib/endpoint_math.R",
+    "public_sha256": "f5b5064baa0efe762611a82a87c8ffb839750942d9e26f82fb2b75612e3c5193",
+    "transformation": "Byte-identical frozen source"
+  },
+  {
+    "source_file": "epic_stability.R",
+    "source_sha256": "95c8c51b219effcc9b45406e151a6b022a372c213bec888e94d854e458c30cd2",
+    "public_file": "study/lib/epic_diagnostics.R",
+    "public_sha256": "dc1c3d42122a4a90b17edd6e6311695d7d81d4de2381fb6b06bb313c5ac0c491",
+    "transformation": "Exact posterior diagnostic functions; fit/instrumentation entrypoints omitted from derived runtime"
+  },
+  {
+    "source_file": "summarize_reference_endpoints.py",
+    "source_sha256": "25a3f11323a185e30a37a813ceb4b07bc15694a88bd6ec4f7c08dfa9cf4859d6",
+    "public_file": "study/summarize_reference.py",
+    "public_sha256": "866d9ceca998bf81a31becdc17a25fd2280005823957e4cde3f15393ed70f684",
+    "transformation": "Scientific operations unchanged; provenance source path made repository-relative"
+  },
+  {
+    "source_file": "summarize_endpoints_v2.py",
+    "source_sha256": "3dd59656384c46952d8268fa2ac32f3b5ee39205affa9f549ba4ea238c2701eb",
+    "public_file": "study/summarize_simulation.py",
+    "public_sha256": "3dd59656384c46952d8268fa2ac32f3b5ee39205affa9f549ba4ea238c2701eb",
+    "transformation": "Byte-identical frozen source"
+  },
+  {
+    "source_file": "endpoint_math_v1c.R",
+    "source_sha256": "61c832d69baacbc36e318086e478299dd667dedcca76f2743b16a82cb240bb3f",
+    "public_file": "study/lib/cellbench_math.R",
+    "public_sha256": "61c832d69baacbc36e318086e478299dd667dedcca76f2743b16a82cb240bb3f",
+    "transformation": "Byte-identical frozen source"
+  },
+  {
+    "source_file": "AGGREGATION_IMPLEMENTATION.py",
+    "source_sha256": "278c14136ecfa7ad4710dbfa258beb76ceba31e6fc5e3b91325f0365d7201b07",
+    "public_file": "study/summarize_cellbench.py",
+    "public_sha256": "c37f40feb1a10a93fd83575c205fde5e64d102372dbc07e2f5338cc93ccf677e",
+    "transformation": "Original frozen aggregation mathematics; restored the exact inherited fraction aggregation call from the same frozen library table"
+  },
+  {
+    "source_file": "test_reference_endpoints.R",
+    "source_sha256": "e943a433e16e4b154687922a6f7ee4a7990cb468c3e87c682e88919442aab8d6",
+    "public_file": "study/tests/test_reference_endpoints.R",
+    "public_sha256": "e943a433e16e4b154687922a6f7ee4a7990cb468c3e87c682e88919442aab8d6",
+    "transformation": "Byte-identical frozen source"
+  },
+  {
+    "source_file": "test_reference_endpoint_summaries.py",
+    "source_sha256": "a0763329fe56ef08caf4e4cb104142e02e52f3e6b4c9569ce5f5e01d1137bf91",
+    "public_file": "study/tests/test_reference_summaries.py",
+    "public_sha256": "274f95c687967d6aa791b6c95fee7185d01c51493b09052b1da3d90d35f8c7a5",
+    "transformation": "Artificial assertions unchanged; import/file lookup paths parameterized for public layout"
+  },
+  {
+    "source_file": "build_endpoints.R",
+    "source_sha256": "562179471a997823f394f415f54193099563ec44638306ee42a702f0e6b73f13",
+    "public_file": "study/lib/simulation_endpoints.R",
+    "public_sha256": "f4b6f67fc2dcfdaf8ba5eee31371e5e09a522ae8866c4a52e3d9855d24a73897",
+    "transformation": "Exact original endpoint loop inside bundle-driven wrapper; fitting/data-path code removed"
+  },
+  {
+    "source_file": "epic_adapter.R",
+    "source_sha256": "c3972bfe673f53273098459db5a4ec05179359aa9bd6ec2bf973facd08cfb5a7",
+    "public_file": "study/model_source/epic_simulation_adapter.R",
+    "public_sha256": "a09475b6018ec1dc0a658fa046429b297a06516ba4957a9d596b7dd726c22aa5",
+    "transformation": "Removed machine-specific library search paths only; no model parameter or math change"
+  },
+  {
+    "source_file": "epic_stability.R",
+    "source_sha256": "95c8c51b219effcc9b45406e151a6b022a372c213bec888e94d854e458c30cd2",
+    "public_file": "study/model_source/epic_stability_instrumentation.R",
+    "public_sha256": "95c8c51b219effcc9b45406e151a6b022a372c213bec888e94d854e458c30cd2",
+    "transformation": "Removed machine-specific library search paths only; no model parameter or math change"
+  },
+  {
+    "source_file": "update_affected_endpoints.R",
+    "source_sha256": "4cee2bb4f7c5db298e2a837a93931d4dcebfaf029863e8ba10c3cb26b56127a8",
+    "public_file": "study/rebuild_cellbench.R",
+    "public_sha256": "b5d74e8332f8e10f904776c4d8b098ee96850e95f8a2d0024b24a1438d941ad4",
+    "transformation": "Exact corrected scientific loop; complete frozen context roster and public relative inputs replace internal delta-only IO"
+  },
+  {
+    "source_file": "summarize_diagnostics.py",
+    "source_sha256": "a9996f3b062c8f0134c36de1f01bd6da934bcbd3018e6c7d8fcef44fe3f9a1ea",
+    "public_file": "study/summarize_diagnostics.py",
+    "public_sha256": "99f98d3aee2bb73c81611ad82fe7c6ca06fa8ead49837f73f89fde545b930b87",
+    "transformation": "Original diagnostic summary body; public single-build IO wrapper"
+  },
+  {
+    "source_file": "epic_stability.R",
+    "source_sha256": "95c8c51b219effcc9b45406e151a6b022a372c213bec888e94d854e458c30cd2",
+    "public_file": "study/lib/cts_from_draws.R",
+    "public_sha256": "5c500096f61de43d3ca84817ed02ed90671e83806d16748717f77ef7771607f5",
+    "transformation": "Exact deterministic reconstruction from retained coefficients and ID aliases; comments/entrypoint isolated"
+  }
+]

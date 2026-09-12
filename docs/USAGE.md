@@ -1,188 +1,57 @@
-# Usage guide
+# Reusable R API
 
-The repository exposes five R source files:
+The study reproduction uses study/ frozen kernels. R/ contains reusable helpers
+and legacy compatibility interfaces. Load R/ctse_benchmark.R before other helpers.
 
-- `R/ctse_benchmark.R`: validation, projection, vector metrics, structured task execution and atomic output;
-- `R/adapters.R`: deterministic conversion of common array/list layouts to `gene × cell_type × sample`;
-- `R/simulation.R`: the frozen simulation design, generators, truth and shared NNLS input;
-- `R/method_wrappers.R`: parameterized BayesPrism, Unico and TCA calls;
-- `R/study_endpoints.R`: simulation and external-validation endpoint aggregation.
+## Explicit units and targets
 
-Source both files from the repository root before use.
-
-## 1. Prepare the inputs
-
-Provide the following objects from your own analysis environment. No input data are bundled with this repository.
-
-### CTSE estimate
-
-A numeric tensor with dimensions:
-
-```text
-gene x cell_type x sample
-```
-
-Required identifiers:
-
-- unique gene identifiers;
-- unique cell-type labels;
-- unique sample identifiers.
-
-### Sample metadata
-
-A table with one row per sample and at least:
-
-```text
-sample_id, group
-```
-
-The `sample_id` values must match the CTSE tensor exactly. The `group` column defines the prespecified comparison.
-
-### Pathway definition
-
-A table with one row per gene and at least:
-
-```text
-gene_id, weight
-```
-
-`weight` must be finite and numeric, with at least one non-zero value. Positive and negative weights encode the prespecified direction of the pathway contrast. The pathway definition must be fixed before evaluating method outputs.
-
-### Optional simulation truth
-
-For simulations, the truth tensor must use the same dimensions and identifiers as the estimate. It is used only for prespecified benchmark endpoints.
-
-## 2. Convert method output
-
-You may supply a completed method output and convert it deterministically:
-
-```r
-# Already canonical: gene × cell type × sample
-x <- canonicalize_ctse_array(raw_array, genes, cell_types, samples)
-
-# Source × gene × sample, as returned by some tensor methods
-x <- canonicalize_source_gene_sample(raw_array, genes, cell_types, samples)
-
-# Named list of gene × sample matrices, one per cell type
-x <- canonicalize_celltype_matrices(raw_list, genes, cell_types, samples)
-```
-
-Adapters validate dimensions, identifier order, duplicates and finite values. They never fill, impute, filter or rescale genes.
-
-Alternatively, source `R/method_wrappers.R` to use the study-parameterized BayesPrism 2.2.3, Unico 0.1.0 or TCA 1.2.1 call. These wrappers do not install dependencies, tune failed fits or retry. Thrown method and numerical errors are returned as structured failures. BayesPrism internally dropped genes are recorded on the actual returned universe rather than filled or imputed.
-
-## 3. Validate before scoring
-
-Reject a task with a structured reason if any of the following checks fails:
-
-- duplicated or missing identifiers;
-- non-finite numeric values;
-- missing samples or cell types;
-- incompatible tensor dimensions;
-- no overlap with the fixed pathway gene set;
-- missing comparison groups;
-- an adapter output that cannot be mapped to the common tensor contract.
-
-`run_ctse_benchmark()` converts validation or numerical errors into a structured terminal record. Do not impute failed outputs and do not remove failures from the task denominator.
-
-## 4. Compute the signed projection
-
-For each sample and cell type:
-
-1. intersect the CTSE gene identifiers with the fixed pathway definition;
-2. preserve the fixed pathway weights;
-3. take the weighted pathway dot product and divide it by the pathway-weight norm and the full-gene contrast L2 norm;
-4. keep sample and cell-type identifiers attached to every value.
-
-Apply the prespecified group contrast to these projection values. Use the same transformation, contrast definition, and missing-value policy for every method.
-
-Executable interface:
-
-```r
-result <- run_ctse_benchmark(
-  estimate = x,
-  sample_metadata = sample_metadata,
-  pathway = pathway_definition,
-  group0 = "control",
-  group1 = "case",
-  truth = optional_truth_tensor,
-  direction_tolerance = 0.05,
-  l2_tolerance = 1e-15
-)
-
-if (identical(result$status, "SUCCESS")) {
-  print(result$projection)
-  print(result$comparison) # present when truth is supplied
-} else {
-  print(result$failure)
-}
-```
-
-For an estimated-versus-reference gene vector, `ctse_vector_metrics()` returns finite-pair count, Spearman correlation, Pearson correlation, RMSE, reference standard deviation and scale-normalized error:
-
-```text
-SNE = RMSE(estimate, reference) / max(SD(reference), 1e-8)
-```
-
-## 5. Record the result
-
-The minimum task record should contain:
-
-```text
-task_id
-method
-scenario
-replicate_id
-status
-started_at
-finished_at
-elapsed_seconds
-failure_class
-failure_message
-output_checksum
-```
-
-Allowed terminal states should distinguish at least:
-
-- success;
-- structured method or input failure;
-- infrastructure failure;
-- timeout or interruption.
-
-Use `write_ctse_benchmark_result(result, output_dir, task_id)` to write one RDS result, one SHA-256 checksum record and exactly one terminal marker. A success marker is created only after validation succeeds. Structured failures receive a separate failure marker and are never converted to success.
-
-## 6. Compare methods
-
-Compare methods only on endpoints fixed before the run. Report the complete task denominator, all failure classes, and the same aggregation rule for every method. Do not tune pathway definitions, contrasts, or exclusion rules after inspecting method performance.
-
-## 7. What is not supplied here
-
-This guide does not provide or expose:
-
-- manuscripts or submission files;
-- original, processed, or source data;
-- benchmark result values or rankings;
-- figures or tables;
-- frozen project checkpoints;
-- server paths, package-session dumps or machine information;
-- author, affiliation, funding, or contribution metadata.
-
-The MIT licence applies to this repository's code. It does not alter the terms of third-party datasets or third-party method packages.
-
-## 8. Controlled simulation and study endpoints
-
-Generate one frozen-design simulation case without private inputs:
+Amplitude comparison now requires a declared matching unit and mathematical target:
 
 ```r
 source("R/ctse_benchmark.R")
-source("R/simulation.R")
-
-design <- ctse_simulation_design()
-profiles <- ctse_population_profiles("complete_cancellation", design)
-bulk <- ctse_generate_bulk("complete_cancellation", 1L, design, profiles)
-truth <- ctse_truth_tensor(profiles, bulk$metadata)
+contract <- ctse_comparison_contract(
+  estimate_unit="CPM", reference_unit="CPM",
+  estimate_target="conditional_expression", reference_target="conditional_expression")
+ctse_vector_metrics(estimate_vector, reference_vector,
+                    comparison_contract=contract)
 ```
 
-The defaults reproduce the six-scenario, 2,000-gene, four-cell-type controlled design, its reference and bulk RNG streams, and 20 samples per group. `ctse_generate_reference()` produces the six-donor reference. `ctse_shared_nnls_fraction()` requires the CRAN `nnls` package.
+This declaration is not evidence by itself: callers must establish its truth.
+Wrong units/targets, nonfinite values and mismatched named IDs fail closed.
+SNE is RMSE / max(SD(reference), 1e-8), only for a compatible comparison.
 
-`R/study_endpoints.R` supplies fraction and gene accuracy tables, task summaries, scale-normalized error via `ctse_vector_metrics()`, deterministic bootstrap intervals, paired method comparisons, and the three-level C1/C2 external-proxy aggregation. Technical libraries are summarized within cell-type-by-mixture units before the mixture-level median; C1 and C2 remain separate.
+run_ctse_benchmark(..., truth=truth_tensor, comparison_contract=contract) also
+requires this contract. When truth is not supplied it calculates the declared
+projection without a truth-performance comparison.
+
+A group contrast is formed first on the appropriate expression scale; the signed
+projection divides its pathway dot product by the weight norm and full supported
+contrast norm. It is not a mean of sample-normalized projections. Direction
+threshold0.05 is not a significance level.
+
+## Tensor and scale guards
+
+R/adapters.R validates gene × cell_type × sample arrays with unique ordered IDs.
+No gene is filled or imputed. R/epic_scale_contract.R offers typed linear input,
+one full-support CPM/log transform, and subset operations retaining the original
+denominator. The fit-access guard rejects evaluation fields and oracle fields
+in practical inputs.
+
+## Legacy code
+
+R/simulation.R exposes the historical generator; it is not run by repro/run.py.
+R/method_wrappers.R remains for legacy use and is not the later four-method
+simulation contract. See study/model_source/frozen_calls.R and MODEL_EXECUTION.md.
+R/study_endpoints.R has reusable legacy aggregation helpers; do not substitute
+its three-level convenience route for the later exact CellBench mass-stratum
+contract. study/rebuild_cellbench.R supplies that frozen implementation.
+
+## Tests
+
+```bash
+Rscript --vanilla tests/run_tests.R
+Rscript --vanilla study/tests/test_semantics.R
+python3 repro/privacy_guard.py .
+```
+
+See README for the independent-container test and real frozen-data reconstruction.

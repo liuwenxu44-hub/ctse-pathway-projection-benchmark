@@ -1,0 +1,6 @@
+method	version	repository	commit_or_tag	language_runtime	license	paper
+BayesPrism	2.2.3	https://github.com/Danko-Lab/BayesPrism	19052052a6f30833b27e2148294459b0ba2f923e	R 4.5.3	GPL-2 | GPL-3	https://doi.org/10.1038/s43018-022-00356-3
+Unico	0.1.0	https://github.com/cozygene/Unico	5d44ded4f6ce93f545e103212305e4a7e8734ec1	R 4.5.3	GPL-3	https://doi.org/10.1186/s13059-025-03776-3
+TCA	1.2.1	https://github.com/cozygene/TCA	v1.2.1 / e8d8ffeb342eb9263f3cc89e8e8f310dba923cd1	R 4.5.3	GPL-3	https://doi.org/10.1038/s41467-019-11052-9
+EPIC-unmix	0.0.1	https://github.com/quansun98/EPICunmix	b512206e3e0bcb9f0720423293094935861fdcde	R 4.5.3	GPL-3	https://doi.org/10.1186/s13059-025-03847-5
+DISSECT	NOT_INSTALLED	NOT_BOUND	NOT_BOUND	NOT_APPLICABLE	NOT_VERIFIED_FOR_THIS_PROTOCOL	NOT_USED
