@@ -1,29 +1,28 @@
-# CTSE expression and signed-projection reproducibility companion
+# CTSE benchmark: cell-type gene expression and pathway changes
 
-Source code and versioned scientific data for a cell-type-specific expression
-(CTSE) benchmark. Static gene-profile agreement, sample-specific change recovery,
-normalized direction and change magnitude are evaluated separately. This project
-does not construct one cross-scale ranking of all methods.
+Cell-type-specific expression (CTSE) methods estimate gene expression for individual cell types within a mixed sample. This benchmark asks four separate questions:
 
-## v0.3.0
+1. Does a method recover the overall gene-expression profile?
+2. Does it recover changes between samples?
+3. Does it recover the direction of pathway changes?
+4. How large are those changes?
 
-- Six frozen scenarios × 20 units; 2,000 genes, four cell types and 40 samples/unit.
-- Original pooled-reference and state0-reference results for BayesPrism, Unico,
-  TCA and EPIC-unmix; Reference-only, Bulk-copy and Always-zero controls.
-- Corrected CellBench CEL-seq2/SORT-seq outputs, separate C1/C2 eligibility,
-  practical/oracle arms, returned genes and Reactome V97 membership.
-- Saved chains from the bounded EPIC diagnostic design.
-- Exact frozen endpoint kernels, scientific manifests, locked dependencies,
-  negative tests and clean-container reproduction.
+Agreement on one question does not establish agreement on the others. Results measured on different scales are kept separate rather than combined into one method ranking.
 
-Large numeric inputs and expected tables are release assets, not Git objects.
-Manuscripts, figures, logs, machine paths and private configuration are excluded.
+## What is included in v0.3.0?
 
-Two independent isolated derived rebuilds passed: all 129 scientific tables are
-byte-identical between builds. [Executed validation evidence](verification/VALIDATION_SUMMARY.md)
-includes table-level hashes, frozen-result reconciliation and explicit test limits.
+- Six simulation scenarios, each with 20 units, 2,000 genes, four cell types and 40 samples per unit.
+- Saved results for BayesPrism, Unico, TCA and EPIC-unmix under two reference settings, pooled-reference and state0-reference. Reference-only, Bulk-copy and Always-zero are included as controls.
+- Corrected CellBench CEL-seq2 and SORT-seq results, with the returned genes and Reactome V97 pathway membership recorded. The two proxy references, C1/C2, and the practical/oracle analysis settings remain separate.
+- Saved EPIC diagnostic runs, calculation code, exact dependency versions and tests.
 
-## Rebuild frozen evidence
+Large numerical inputs and expected result tables are provided as release downloads, not stored directly in Git. The repository does not include manuscripts, figures, execution logs or private machine settings.
+
+For v0.3.0, two separate container runs produced the same 129 scientific tables, byte for byte. The [validation report](verification/VALIDATION_SUMMARY.md) lists what was checked and the limits of those checks. Some identified historical tables are copied unchanged, not newly calculated from model fits.
+
+## Recalculate tables from the saved model outputs
+
+The tested workflow starts with the supplied model outputs and recalculates evaluation measures and summaries. **It does not train the methods or fit non-negative least-squares (NNLS) models.** Training code and prepared inputs are included, but a complete new four-method training run was not tested for this release.
 
 Linux x86-64, Docker and host Python 3.10+ are required. Allow approximately 60 GB
 disk space for downloads, inputs and two rebuilds. Run from the repository root:
@@ -41,41 +40,27 @@ docker run --rm --network none --read-only --cap-drop=ALL \
   python3 repro/run.py --data /inputs --output /outputs/A --jobs 4
 ```
 
-Repeat with /outputs/B for an independent derived rebuild. The runner verifies
-input hashes, reconstructs tables, checks the closed expected inventory, and
-rechecks inputs. See the fixed [comparison policy](repro/COMPARISON_POLICY.md).
+Repeat with `/outputs/B` to make a second rebuild. The runner checks input-file hashes, reconstructs the tables, compares the results with the expected files, and checks that the inputs have not changed. Numerical tolerances are specified in the [comparison policy](repro/COMPARISON_POLICY.md).
 
-**No model or NNLS is fitted by this command.** The tested route is frozen
-output → derived endpoint/summary. Fitting source and prepared inputs are also
-supplied, but new four-method fits were not executed in this engineering release.
+## How to interpret the comparisons
 
-## Scientific boundaries
-
-- Four-method gene-vector Spearman uses identical actual support within each
-  comparison; different support contexts are never pooled into extra replicates.
-- Unico/TCA linear CPM and EPIC native-log secondary endpoints remain separate.
-  No clipping, forced exponentiation or arbitrary scaling creates comparability.
-- Historical BayesPrism direction results retain their original contribution/
-  profile target, not a common conditional-expression amplitude interpretation.
-- C1/C2 are separate proxies, not absolute truth. Composition is the CellBench
-  descriptive unit after frozen mass-stratum aggregation.
-- Failure, abstention, undefined correlation and semantic non-comparability are
-  distinct; none is imputed as zero.
-- The 0.05 direction threshold is not a p-value. A nonzero normalized direction
-  can coexist with very small change magnitude.
+- Gene-profile correlations compare the same available genes within each comparison. Results based on different gene sets are not counted as extra replicates.
+- Unico/TCA expression on the linear counts-per-million (CPM) scale is not merged with EPIC's native-log secondary results. Rescaling the numbers does not make these targets equivalent.
+- The historical BayesPrism direction results describe their original contribution/profile target. They are not reinterpreted as the size of changes in conditional cell-type expression.
+- C1 and C2 are two proxy references, not absolute biological truth. CellBench summaries use mixture composition as the unit after aggregating the predefined RNA-mass groups; technical libraries are not extra independent samples.
+- A failed method, insufficient evidence, an undefined correlation and an incompatible comparison are different outcomes. None is replaced with zero.
+- The direction cutoff of **0.05 is not a p-value**. A change can have a nonzero direction score while being very small in magnitude.
 
 ## Documentation
 
 - [Reproduction coverage and limits](docs/REPRODUCIBILITY.md)
 - [Data dictionary](docs/DATA_DICTIONARY.md)
-- [Model source and scale contracts](docs/MODEL_EXECUTION.md)
+- [Model code, expression scales and comparison targets](docs/MODEL_EXECUTION.md)
 - [Reusable R API](docs/USAGE.md)
 - [Third-party terms](THIRD_PARTY_NOTICES.md)
 - [Changelog](CHANGELOG.md)
-- [Executed tests and data/source integrity](verification/VALIDATION_SUMMARY.md)
+- [Recorded tests and file-integrity checks](verification/VALIDATION_SUMMARY.md)
 
-Experimental sources include [CellBench GSE118767](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118767).
-The earlier GSE220605/GSE220606 case remains a restricted historical assessment,
-not a newly rerun validation layer. Original repository code uses the
-[MIT License](LICENSE), which does not relicense third-party methods or datasets.
-No DOI is assigned or implied for this release.
+Experimental sources include [CellBench GSE118767](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE118767). The earlier GSE220605/GSE220606 case is retained only as a limited historical assessment; it was not rerun as new validation for this release.
+
+Original repository code uses the [MIT License](LICENSE). Third-party methods and datasets keep their own terms. This release has no assigned DOI.
